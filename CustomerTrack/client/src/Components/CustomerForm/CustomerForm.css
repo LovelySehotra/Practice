@@ -1,0 +1,41 @@
+/* General layout for the form */
+.form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  /* Container for inputs - horizontal layout */
+  .input-container {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  
+  /* Input styles */
+  .input-field {
+    padding: 0.5rem;
+    border-radius: 1rem;
+    border: 1px solid #9ca3af; /* border-gray-400 */
+    background-color: transparent;
+    color: #d1d5db; /* text-gray-300 */
+    flex: 1;
+  }
+  
+  /* Button styles */
+  .submit-button {
+    background-color: #f87171; /* bg-red-400 */
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .submit-button:hover {
+    background-color: #f87171;
+  }
+  
