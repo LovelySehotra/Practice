@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { ProductController } from "../controllers/product.controller";
 import { ProductService } from "@/application/services/Product/ProductService";
-const productController = new ProductController(new ProductService());
+import { RedisService } from "@/application/services/Redis/RedisService";
+const productController = new ProductController(new ProductService(),new RedisService());
 const router= Router();
 
 router
