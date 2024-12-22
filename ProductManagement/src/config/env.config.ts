@@ -8,5 +8,8 @@ dotenv.config({ path: path.resolve(__dirname, "../../.env") })
 export const {
     PORT,
     DATABASE_URL,
-    JWT_SECRET
+    JWT_SECRET,
+    STRIPE_SECRET,
+    PAYMENT_SUCCESS_REDIRECT,
+    PAYMENT_CANCEL_REDIRECT,
 } = process.env
