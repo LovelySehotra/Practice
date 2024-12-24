@@ -12,4 +12,6 @@ export const {
     STRIPE_SECRET,
     PAYMENT_SUCCESS_REDIRECT,
     PAYMENT_CANCEL_REDIRECT,
+    SECRET_KEY_2FA,
+    BOT_TOKEN
 } = process.env
