@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polygon Splitting with D3.js</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .dot {
+      fill: blue;
+      cursor: pointer;
+    }
+    .line {
+      stroke: red;
+      stroke-width: 2;
+    }
+    .polygon {
+      fill: lightgray;
+      stroke: black;
+      stroke-width: 2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Polygon Splitting Example with D3.js</h1>
+  <svg id="polygonCanvas" width="400" height="300"></svg>
+  <p>Click on two dots to create a cut through the rectangle.</p>
+  <script>
+    const width = 400;
+    const height = 300;
+
+    // Define SVG canvas
+    const svg = d3.select('#polygonCanvas');
+
+    // Rectangle vertices
+    const rectangle = [
+      { x: 50, y: 50 },
+      { x: 350, y: 50 },
+      { x: 350, y: 150 },
+      { x: 50, y: 150 },
+    ];
+
+    // Dots on the rectangle
+    const dots = [
+      { x: 50, y: 50 },
+      { x: 200, y: 50 },
+      { x: 350, y: 50 },
+      { x: 50, y: 150 },
+      { x: 200, y: 150 },
+      { x: 350, y: 150 },
+    ];
+
+    let selectedDots = [];
+
+    // Draw the rectangle
+    svg.append('polygon')
+      .attr('points', rectangle.map(d => `${d.x},${d.y}`).join(' '))
+      .attr('class', 'polygon');
+
+    // Draw the dots
+    svg.selectAll('.dot')
+      .data(dots)
+      .enter()
+      .append('circle')
+      .attr('class', 'dot')
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
+      .attr('r', 5)
+      .on('click', handleDotClick);
+
+    // Function to handle dot clicks
+    function handleDotClick(event, d) {
+      selectedDots.push(d);
+      if (selectedDots.length === 2) {
+        drawCut(selectedDots);
+        selectedDots = [];
+      }
+    }
+
+    // Function to draw a cutting line
+    function drawCut([dot1, dot2]) {
+      svg.append('line')
+        .attr('x1', dot1.x)
+        .attr('y1', dot1.y)
+        .attr('x2', dot2.x)
+        .attr('y2', dot2.y)
+        .attr('class', 'line');
+
+      const newPolygons = splitPolygon(rectangle, dot1, dot2);
+      redrawPolygon(newPolygons);
+    }
+
+    // Function to redraw the polygons
+    function redrawPolygon(polygons) {
+      svg.selectAll('.polygon').remove(); // Remove old polygon
+      polygons.forEach(poly => {
+        svg.append('polygon')
+          .attr('points', poly.map(d => `${d.x},${d.y}`).join(' '))
+          .attr('class', 'polygon');
+      });
+    }
+
+    // Split the rectangle into two polygons
+    function splitPolygon(polygon, dot1, dot2) {
+      const newPolygons = [[], []];
+
+      polygon.forEach((vertex, i) => {
+        const nextVertex = polygon[(i + 1) % polygon.length];
+        const isStartSame = isSameSide(vertex, dot1, dot1, dot2);
+        const isEndSame = isSameSide(nextVertex, dot1, dot1, dot2);
+
+        if (!isStartSame) newPolygons[0].push(vertex);
+        if (!isEndSame) newPolygons[1].push(nextVertex);
+
+        const intersection = getLineIntersection(vertex, nextVertex, dot1, dot2);
+        if (intersection) {
+          newPolygons[0].push(intersection);
+          newPolygons[1].push(intersection);
+        }
+      });
+
+      return newPolygons;
+    }
+
+    // Check if two points are on the same side of a line
+    function isSameSide(p1, p2, a, b) {
+      const cross1 = (b.x - a.x) * (p1.y - a.y) - (b.y - a.y) * (p1.x - a.x);
+      const cross2 = (b.x - a.x) * (p2.y - a.y) - (b.y - a.y) * (p2.x - a.x);
+      return cross1 * cross2 >= 0;
+    }
+
+    // Calculate line intersection
+    function getLineIntersection(p1, p2, p3, p4) {
+      const A1 = p2.y - p1.y;
+      const B1 = p1.x - p2.x;
+      const C1 = A1 * p1.x + B1 * p1.y;
+
+      const A2 = p4.y - p3.y;
+      const B2 = p3.x - p4.x;
+      const C2 = A2 * p3.x + B2 * p3.y;
+
+      const det = A1 * B2 - A2 * B1;
+      if (det === 0) return null; // Parallel lines
+
+      const x = (B2 * C1 - B1 * C2) / det;
+      const y = (A1 * C2 - A2 * C1) / det;
+
+      if (
+        Math.min(p1.x, p2.x) <= x && x <= Math.max(p1.x, p2.x) &&
+        Math.min(p1.y, p2.y) <= y && y <= Math.max(p1.y, p2.y) &&
+        Math.min(p3.x, p4.x) <= x && x <= Math.max(p3.x, p4.x) &&
+        Math.min(p3.y, p4.y) <= y && y <= Math.max(p3.y, p4.y)
+      ) {
+        return { x, y };
+      }
+      return null;
+    }
+  </script>
+</body>
+</html>
